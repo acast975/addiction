@@ -1,6 +1,6 @@
 import pandas
 import numpy
-from sklearn.preprocessing import Normalizer
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.impute import SimpleImputer
 
 try:
@@ -28,13 +28,13 @@ try:
     for column in feature_data_raw.columns:
         feature_data_raw[column] = pandas.to_numeric(feature_data_raw[column], errors='coerce')
 
-    imputer = SimpleImputer(missing_values=numpy.nan, strategy='mean')
+    imputer = SimpleImputer(missing_values=numpy.nan, strategy='most_frequent')
     imputed_data = imputer.fit_transform(feature_data_raw)
 
-    normalizer = Normalizer(norm='l2')
-    normalized_data = normalizer.fit_transform(imputed_data)
+    scaler = MinMaxScaler()
+    scaled_data = scaler.fit_transform(imputed_data)
 
-    feature_data_processed = pandas.DataFrame(normalized_data)
+    feature_data_processed = pandas.DataFrame(scaled_data)
     feature_data_processed.columns = feature_data_raw.columns
     print('Hello world!')
 except Exception as ex:
