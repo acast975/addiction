@@ -1,5 +1,6 @@
 import pandas
 import numpy
+import matplotlib.pyplot as plot
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
@@ -7,8 +8,10 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.feature_selection import RFE
+from sklearn.feature_selection import RFE, RFECV
+from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+import seaborn as sns
 
 try:
     # loading raw data from dataset
@@ -115,7 +118,8 @@ try:
     # using RFE (Recursive Feature Estimation)
     print('Logistic Regression classifier after using RFE')
     classifier = LogisticRegression(max_iter=10000, solver='lbfgs')
-    rfe = RFE(classifier, 5)
+    rfe = RFE(classifier, 15)
+
 
     rfe_data = rfe.fit_transform(feature_data_processed, class_data)
     selected_columns = rfe.get_support(indices=True)
@@ -123,6 +127,8 @@ try:
     columns_rfe = [
         feature_data_processed.columns[selected] for selected in selected_columns
     ]
+
+    print('RFE selected columns {}'.format(columns_rfe))
 
     feature_data_rfe = pandas.DataFrame(rfe_data)
     feature_data_rfe.columns = columns_rfe
@@ -140,6 +146,51 @@ try:
     print('score={}'.format(accuracy_score(test_class_data, test_predicted_data)))
     print(confusion_matrix(test_class_data, test_predicted_data))
     print(classification_report(test_class_data, test_predicted_data))
+
+    # using RFE (Recursive Feature Estimation)
+    print('Logistic Regression classifier after using RFECV')
+    classifier = LogisticRegression(max_iter=10000, solver='lbfgs')
+    rfecv = RFECV(estimator=classifier, step=1, cv=StratifiedKFold(2), scoring='accuracy')
+
+    rfecv_data = rfecv.fit_transform(feature_data_processed, class_data)
+
+    # Plot number of features VS. cross-validation scores
+    plot.figure()
+    plot.xlabel("Number of features selected")
+    plot.ylabel("Cross validation score (nb of correct classifications)")
+    plot.plot(range(1, len(rfecv.grid_scores_) + 1), rfecv.grid_scores_)
+    plot.show()
+
+    selected_columns = rfecv.get_support(indices=True)
+    columns_rfecv = [
+        feature_data_processed.columns[selected] for selected in selected_columns
+    ]
+
+    print('RFECV selected columns {}'.format(columns_rfe))
+
+    feature_data_rfecv = pandas.DataFrame(rfecv_data)
+    feature_data_rfecv.columns = columns_rfecv
+
+    # split rfe data to trainig and test set (30% test set)
+    train_feature_data, test_feature_data, train_class_data, test_class_data = \
+        train_test_split(feature_data_rfecv, class_data, test_size=0.3, stratify=class_data)
+
+    classifier.fit(train_feature_data, train_class_data)
+
+    # predict using model and test data
+    test_predicted_data = classifier.predict(test_feature_data)
+
+    # calculatre metrics
+    print('score={}'.format(accuracy_score(test_class_data, test_predicted_data)))
+    print(confusion_matrix(test_class_data, test_predicted_data))
+    print(classification_report(test_class_data, test_predicted_data))
+
+
+    # Using Pearson Correlation
+    plot.figure(figsize=(12, 10))
+    cor = feature_data_processed.corr()
+    sns.heatmap(cor, annot=True, cmap=plot.cm.Reds)
+    plot.show()
 
 except Exception as ex:
     print(str(ex))
