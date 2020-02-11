@@ -7,6 +7,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_selection import RFE
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 
 try:
@@ -26,6 +27,7 @@ try:
     feature_names = [
         column for column in raw_data.columns
         if not column.startswith('TEMPS')
+            and not column.startswith('Internet')
             and column not in ['ID', 'FBupotreba', 'PROT_SADR_AKT', 'RISK_SADR_AKT', 'Temper_bin', 'NKP', 'PI', 'SPO', 'PUI', 'PUIcutoff']
     ]
 
@@ -110,6 +112,34 @@ try:
     print(confusion_matrix(test_class_data, test_predicted_data))
     print(classification_report(test_class_data, test_predicted_data))
 
+    # using RFE (Recursive Feature Estimation)
+    print('Logistic Regression classifier after using RFE')
+    classifier = LogisticRegression(max_iter=10000, solver='lbfgs')
+    rfe = RFE(classifier, 5)
+
+    rfe_data = rfe.fit_transform(feature_data_processed, class_data)
+    selected_columns = rfe.get_support(indices=True)
+
+    columns_rfe = [
+        feature_data_processed.columns[selected] for selected in selected_columns
+    ]
+
+    feature_data_rfe = pandas.DataFrame(rfe_data)
+    feature_data_rfe.columns = columns_rfe
+
+    # split rfe data to trainig and test set (30% test set)
+    train_feature_data, test_feature_data, train_class_data, test_class_data = \
+        train_test_split(feature_data_rfe, class_data, test_size=0.3, stratify=class_data)
+
+    classifier.fit(train_feature_data, train_class_data)
+
+    # predict using model and test data
+    test_predicted_data = classifier.predict(test_feature_data)
+
+    # calculatre metrics
+    print('score={}'.format(accuracy_score(test_class_data, test_predicted_data)))
+    print(confusion_matrix(test_class_data, test_predicted_data))
+    print(classification_report(test_class_data, test_predicted_data))
 
 except Exception as ex:
     print(str(ex))
