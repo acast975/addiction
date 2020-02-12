@@ -37,6 +37,26 @@ try:
     # class column for binary classification of addiction                 ]
     class_name = 'PUIcutoff'
 
+    corr_data = raw_data[feature_names]
+    corr_data[class_name] = raw_data[class_name]
+
+    # check correlations Pearson Correlation
+    # plot.figure(figsize=(120, 100))
+    cor = raw_data.corr()
+    # sns.heatmap(cor, annot=True, cmap=plot.cm.Reds)
+    # plot.show()
+    cor_target = abs(cor['PUIcutoff'])
+    relevant_features = cor_target[cor_target > 0.3]
+    print('List of relevant features (Pearson correlation > 0.3')
+    print(relevant_features)
+
+    for column_i in corr_data.columns:
+        for column_j in corr_data.columns:
+            if column_i != column_j:
+                column_corr = corr_data[[column_i, column_j]].corr()
+                if abs(column_corr.iloc[0].iloc[1]) > 0.5:
+                    print("Person correlation between columns {} and {}: {}".format(column_i, column_j, column_corr.iloc[0].iloc[1]))
+
     feature_data_raw = raw_data[feature_names]
     class_data = raw_data[class_name]
 
@@ -184,13 +204,6 @@ try:
     print('score={}'.format(accuracy_score(test_class_data, test_predicted_data)))
     print(confusion_matrix(test_class_data, test_predicted_data))
     print(classification_report(test_class_data, test_predicted_data))
-
-
-    # Using Pearson Correlation
-    plot.figure(figsize=(12, 10))
-    cor = feature_data_processed.corr()
-    sns.heatmap(cor, annot=True, cmap=plot.cm.Reds)
-    plot.show()
 
 except Exception as ex:
     print(str(ex))
