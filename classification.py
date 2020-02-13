@@ -1,5 +1,6 @@
 import pandas
 import numpy
+import matplotlib
 import matplotlib.pyplot as plot
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
@@ -9,6 +10,7 @@ from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import RFE, RFECV
+from sklearn.linear_model import LassoCV, Lasso
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 import seaborn as sns
@@ -29,9 +31,10 @@ try:
     # for this pass we don't want to use TEMPS features that were used to determine subjects temperaments
     feature_names = [
         column for column in raw_data.columns
-        if not column.startswith('TEMPS')
-            and not column.startswith('Internet')
-            and column not in ['ID', 'FBupotreba', 'PROT_SADR_AKT', 'RISK_SADR_AKT', 'Temper_bin', 'NKP', 'PI', 'SPO', 'PUI', 'PUIcutoff']
+        # if not column.startswith('TEMPS')
+        #    and not column.startswith('Internet')
+        #    and column not in ['ID', 'FBupotreba', 'PROT_SADR_AKT', 'RISK_SADR_AKT', 'Temper_bin', 'NKP', 'PI', 'SPO', 'PUI', 'PUIcutoff']
+        if column.startswith('Internet')
     ]
 
     # class column for binary classification of addiction                 ]
@@ -41,9 +44,10 @@ try:
     corr_data[class_name] = raw_data[class_name]
 
     # check correlations Pearson Correlation
-    # plot.figure(figsize=(120, 100))
+    # plot.figure(figsize=(12, 10))
     cor = raw_data.corr()
     # sns.heatmap(cor, annot=True, cmap=plot.cm.Reds)
+    # plot.matshow(cor)
     # plot.show()
     cor_target = abs(cor['PUIcutoff'])
     relevant_features = cor_target[cor_target > 0.3]
@@ -204,6 +208,16 @@ try:
     print('score={}'.format(accuracy_score(test_class_data, test_predicted_data)))
     print(confusion_matrix(test_class_data, test_predicted_data))
     print(classification_report(test_class_data, test_predicted_data))
+
+    # feature selection using LassoCV
+    lasso = LassoCV(cv=3)
+    lasso.fit(feature_data_processed, class_data)
+    coef = pandas.Series(lasso.coef_, index=feature_data_processed.columns)
+    imp_coef = coef.sort_values()
+    matplotlib.rcParams['figure.figsize'] = (8.0, 10.0)
+    imp_coef.plot(kind="barh")
+    plot.title("Feature importance using Lasso Model")
+    plot.show()
 
 except Exception as ex:
     print(str(ex))
