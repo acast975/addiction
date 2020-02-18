@@ -31,21 +31,21 @@ try:
     # for this pass we don't want to use TEMPS features that were used to determine subjects temperaments
     feature_names = [
         column for column in raw_data.columns
-        # if not column.startswith('TEMPS')
-        #    and not column.startswith('Internet')
-        #    and column not in ['ID', 'FBupotreba', 'PROT_SADR_AKT', 'RISK_SADR_AKT', 'Temper_bin', 'NKP', 'PI', 'SPO', 'PUI', 'PUIcutoff']
-        if column.startswith('Internet')
+        if not column.startswith('TEMPS')
+            and not column.startswith('Internet')
+            and column not in ['ID', 'FBupotreba', 'PROT_SADR_AKT', 'RISK_SADR_AKT', 'Temper_bin', 'NKP', 'PI', 'SPO', 'PUI', 'PUIcutoff']
+        # if column.startswith('Internet')
     ]
 
     # class column for binary classification of addiction                 ]
     class_name = 'PUIcutoff'
 
     corr_data = raw_data[feature_names]
-    corr_data[class_name] = raw_data[class_name]
+    corr_data.insert(0, class_name, raw_data[class_name].to_numpy())
 
     # check correlations Pearson Correlation
     # plot.figure(figsize=(12, 10))
-    cor = raw_data.corr()
+    cor = corr_data.corr()
     # sns.heatmap(cor, annot=True, cmap=plot.cm.Reds)
     # plot.matshow(cor)
     # plot.show()
