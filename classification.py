@@ -10,14 +10,14 @@ from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import RFE, RFECV
-from sklearn.linear_model import LassoCV, Lasso
+from sklearn.linear_model import LassoCV, ElasticNetCV
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 import seaborn as sns
 
 try:
     # loading raw data from dataset
-    raw_data = pandas.read_csv('./datasets/addict-fix.csv')
+    raw_data = pandas.read_csv('./datasets/addict-fix-limit.csv')
 
     # convert everything to numeric data
     # missing value are replaced with NoN
@@ -33,6 +33,8 @@ try:
         column for column in raw_data.columns
         if not column.startswith('TEMPS')
             and not column.startswith('Internet')
+            and not column.startswith('Sadrzaj')
+            and not column.startswith('Aktivnost')
             and column not in ['ID', 'FBupotreba', 'PROT_SADR_AKT', 'RISK_SADR_AKT', 'Temper_bin', 'NKP', 'PI', 'SPO', 'PUI', 'PUIcutoff']
         # if column.startswith('Internet')
     ]
@@ -217,6 +219,16 @@ try:
     matplotlib.rcParams['figure.figsize'] = (16.0, 20.0)
     imp_coef.plot(kind="barh")
     plot.title("Feature importance using Lasso Model")
+    plot.show()
+
+    # feature selection using ElasticNetCV
+    enet = ElasticNetCV(cv=3)
+    enet.fit(feature_data_processed, class_data)
+    coef = pandas.Series(enet.coef_, index=feature_data_processed.columns)
+    imp_coef = coef.sort_values()
+    matplotlib.rcParams['figure.figsize'] = (16.0, 20.0)
+    imp_coef.plot(kind="barh")
+    plot.title("Feature importance using ElasticNet Model")
     plot.show()
 
 except Exception as ex:
