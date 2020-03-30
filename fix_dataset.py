@@ -6,7 +6,7 @@ try:
 
     # iterate through all columns
     for column in raw_data.columns:
-        if column in ['ImaKomp', 'DaMozeDaLiBi', 'EnergetskoP', 'Grickalice', 'Pusac', 'Droga']:
+        if column in ['ImaKomp', 'DaMozeDaLiBi', 'EnergetskoP', 'Grickalice', 'Pusac', 'Droga', 'Pol']:
             raw_data[column].replace({'2': '0'}, inplace=True)
 
         if column == 'Uspeh':

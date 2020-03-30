@@ -35,7 +35,7 @@ try:
             and not column.startswith('Internet')
             and not column.startswith('Sadrzaj')
             and not column.startswith('Aktivnost')
-            and column not in ['ID', 'FBupotreba', 'PROT_SADR_AKT', 'RISK_SADR_AKT', 'Temper_bin', 'NKP', 'PI', 'SPO', 'PUI', 'PUIcutoff']
+            and column not in ['ID', 'FBupotreba', 'KolikoCigareta', 'NeZnaNet', 'PROT_SADR_AKT', 'RISK_SADR_AKT', 'Temper_bin', 'NKP', 'PI', 'SPO', 'PUI', 'PUIcutoff']
         # if column.startswith('Internet')
     ]
 
