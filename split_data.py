@@ -22,7 +22,7 @@ try:
 
     result = pandas.concat([samplen, samplep])
 
-    raw_data.to_csv('./datasets/addict-fix-limit.csv')
+    raw_data.to_csv('./datasets/addict-fix-limit.csv', index=False)
 
 except Exception as err:
     print(str(err))

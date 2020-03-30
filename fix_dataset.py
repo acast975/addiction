@@ -20,6 +20,6 @@ try:
 
     raw_data.rename(columns={'BrojDana': 'BrojDanaFizickeAktivnosti'})
 
-    raw_data.to_csv('./datasets/addict-fix.csv')
+    raw_data.to_csv('./datasets/addict-fix.csv', index=False)
 except Exception as err:
     print(str(err))
